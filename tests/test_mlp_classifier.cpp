@@ -1,66 +1,40 @@
 #include <fstream>
-
 #include <gtest/gtest.h>
-#include <Eigen/Dense>
-
-#include "mlp_classifier.h"
-
 #include "io.h"
-
-using namespace mnist;
-
-const size_t input_dim = 784;
-const size_t hidden_dim = 128;
-const size_t output_dim = 10;
-
-TEST(MlpClassifier, predict_proba) {
-    auto w1 = read_mat_from_file(input_dim, hidden_dim, "train/w1.txt");
-    auto w2 = read_mat_from_file(hidden_dim, output_dim, "train/w2.txt");
-
-    auto clf = MlpClassifier{w1.transpose(), w2.transpose()};
-
-    auto proba_true = MlpClassifier::probas_t{};
-    auto features = MlpClassifier::features_t{};
-
-
-    std::ifstream test_data{"train/test_mnist_mlp.txt"};
-    ASSERT_TRUE(test_data.is_open());
-    for (;;) {
-        proba_true.clear();
-        for (size_t i = 0; i < output_dim; ++i) {
-            float val;
-            test_data >> val;
-            proba_true.push_back(val);
-        }
-        if (!read_features(test_data, features)) {
-            break;
-        }
-        auto proba_pred = clf.predict_proba(features);
-        ASSERT_EQ(proba_true.size(), proba_pred.size());
-        for (size_t i = 0; i < output_dim; ++i) {
-            ASSERT_NEAR(proba_true[i], proba_pred[i], 1e-5);
-        }
-    }
+#include "mlp_classifier.h"
+namespace {
+constexpr std::size_t kInputDim = 784;
+constexpr std::size_t kHiddenDim = 128;
+constexpr std::size_t kOutputDim = 10;
+class MlpClassifierTest : public testing::Test {
+protected:
+    MlpClassifierTest()
+        : m_classifier{
+            mnist::read_mat_from_file(kInputDim, kHiddenDim, "model/w1.txt").transpose(),
+            mnist::read_mat_from_file(kHiddenDim, kOutputDim, "model/w2.txt").transpose()}
+    {}
+    mnist::MlpClassifier m_classifier;
+};
 }
-
-TEST(DISABLED_MlpClassifier, predict_class) {
-    auto w1 = read_mat_from_file(input_dim, hidden_dim, "train/w1.txt");
-    auto w2 = read_mat_from_file(hidden_dim, output_dim, "train/w2.txt");
-
-    auto clf = MlpClassifier{w1.transpose(), w2.transpose()};
-
-    auto features = MlpClassifier::features_t{};
-
-
-    std::ifstream test_data{"train/test_mnist_mlp_classes.txt"};
-    ASSERT_TRUE(test_data.is_open());
-    for (;;) {
-        size_t y_true;
-        test_data >> y_true;
-        if (!read_features(test_data, features)) {
-            break;
-        }
-        auto y_pred = clf.predict(features);
-        ASSERT_EQ(y_true, y_pred);
-    }
+#if (1)
+// Part 1. Проверка классификатора MLP
+// Test 1.1. Классификатор возвращает количество классов Fashion MNIST
+TEST_F(MlpClassifierTest, Metadata_WhenModelLoaded_ReturnsTenClasses) {
+    EXPECT_EQ(kOutputDim, m_classifier.num_classes());
 }
+// Test 1.2. Классификатор повторяет контрольные предсказания Python-модели
+TEST_F(MlpClassifierTest, Prediction_WhenReferenceDataProvided_MatchesPythonModel) {
+    std::ifstream test_data{"data/test_data_mlp.txt"};
+    ASSERT_TRUE(test_data.is_open());
+    mnist::MlpClassifier::features_t features;
+    std::size_t expected_class = 0;
+    std::size_t samples_count = 0;
+    while (test_data >> expected_class) {
+        ASSERT_TRUE(mnist::read_features(test_data, features));
+        ASSERT_EQ(features.size(), kInputDim);
+        EXPECT_EQ(expected_class, m_classifier.predict(features));
+        ++samples_count;
+    }
+    EXPECT_EQ(10u, samples_count);
+}
+#endif

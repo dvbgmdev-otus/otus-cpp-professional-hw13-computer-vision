@@ -41,7 +41,7 @@ MlpClassifier::MlpClassifier(const Eigen::MatrixXf& w1, const Eigen::MatrixXf& w
 {}
 
 size_t MlpClassifier::num_classes() const {
-    return m_w2.cols();
+    return m_w2.rows();
 }
 
 

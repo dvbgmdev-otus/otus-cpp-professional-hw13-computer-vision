@@ -18,3 +18,10 @@ docker build -t fashion-mnist .
 ```bash
 docker build --pull --no-cache -t fashion-mnist .
 ```
+
+Запуск тестов:
+
+```bash
+docker run --rm --workdir /workspace/build \
+    fashion-mnist ctest --output-on-failure
+```
