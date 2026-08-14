@@ -17,7 +17,7 @@ public:
     probas_t predict_proba(const features_t&) const override;
 
 private:
-    Eigen::MatrixXf w1_, w2_;
+    Eigen::MatrixXf m_w1, m_w2;
 };
 
 }

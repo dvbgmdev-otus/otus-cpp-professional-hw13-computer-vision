@@ -36,12 +36,12 @@ VectorXf softmax(const VectorXf& v) {
 
 }
 MlpClassifier::MlpClassifier(const Eigen::MatrixXf& w1, const Eigen::MatrixXf& w2)
-    : w1_{w1}
-    , w2_{w2}
+    : m_w1{w1}
+    , m_w2{w2}
 {}
 
 size_t MlpClassifier::num_classes() const {
-    return w2_.cols();
+    return m_w2.cols();
 }
 
 
@@ -57,8 +57,8 @@ MlpClassifier::probas_t MlpClassifier::predict_proba(const features_t& feat) con
         x[i] = feat[i] / 255;
     }
 
-    auto o1 = sigmav(w1_ * x);
-    auto o2 = softmax(w2_ * o1);
+    auto o1 = sigmav(m_w1 * x);
+    auto o2 = softmax(m_w2 * o1);
 
     probas_t res;
     for (size_t i = 0; i < o2.rows(); ++i) {
