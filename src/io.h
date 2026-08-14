@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 
-#include <mnist/classifier.h>
+#include "classifier.h"
 
 namespace mnist{
 

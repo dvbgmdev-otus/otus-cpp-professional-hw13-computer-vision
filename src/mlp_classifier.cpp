@@ -1,5 +1,6 @@
-#include <mnist/mlp_classifier.h>
+#include "mlp_classifier.h"
 
+#include <algorithm>
 #include <cmath>
 
 using mnist::MlpClassifier;

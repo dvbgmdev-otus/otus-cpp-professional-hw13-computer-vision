@@ -1,6 +1,0 @@
-[requires]
-gtest/1.11.0
-eigen/3.3.9
-
-[generators]
-cmake

@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 #include <Eigen/Dense>
 
-#include <mnist/mlp_classifier.h>
+#include "mlp_classifier.h"
 
-#include <helpers.h>
+#include "io.h"
 
 using namespace mnist;
 
