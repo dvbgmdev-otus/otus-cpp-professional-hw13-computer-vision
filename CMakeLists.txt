@@ -25,6 +25,14 @@ target_link_libraries(mnist PUBLIC
     Eigen3::Eigen
 )
 
+add_executable(fashion_mnist
+    src/main.cpp
+)
+
+target_link_libraries(fashion_mnist PRIVATE
+    mnist
+)
+
 enable_testing()
 
 add_executable(test_mnist
