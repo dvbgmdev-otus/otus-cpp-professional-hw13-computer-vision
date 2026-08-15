@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 #include <iterator>
+#include <sstream>
+#include <stdexcept>
 
 namespace mnist {
 
@@ -20,7 +21,7 @@ Eigen::MatrixXf read_mat_from_stream(size_t rows, size_t cols, std::istream& str
 }
 
 Eigen::MatrixXf read_mat_from_file(size_t rows, size_t cols, const std::string& filepath) {
-    std::ifstream stream{filepath};
+    std::ifstream stream{ filepath };
     return read_mat_from_stream(rows, cols, stream);
 }
 
@@ -29,12 +30,37 @@ bool read_features(std::istream& stream, Classifier::features_t& features) {
     std::getline(stream, line);
 
     features.clear();
-    std::istringstream linestream{line};
+    std::istringstream linestream{ line };
     double value;
     while (linestream >> value) {
         features.push_back(value);
     }
     return stream.good();
+}
+
+bool read_sample(std::istream& stream,
+                 std::size_t& expected_class,
+                 Classifier::features_t& features) {
+    std::string line;
+    if (!std::getline(stream, line)) {
+        return false;
+    }
+    std::replace(line.begin(), line.end(), ',', ' ');
+    std::istringstream line_stream{ line };
+    long long parsed_class = 0;
+    if (!(line_stream >> parsed_class) || parsed_class < 0) {
+        throw std::invalid_argument{ "Invalid sample class" };
+    }
+    expected_class = static_cast<std::size_t>(parsed_class);
+    features.clear();
+    float value = 0.0f;
+    while (line_stream >> value) {
+        features.push_back(value);
+    }
+    if (!line_stream.eof()) {
+        throw std::invalid_argument{ "Invalid sample feature" };
+    }
+    return true;
 }
 
 std::vector<float> read_vector(std::istream& stream) {
@@ -46,4 +72,4 @@ std::vector<float> read_vector(std::istream& stream) {
     return result;
 }
 
-}
+}  // namespace mnist
