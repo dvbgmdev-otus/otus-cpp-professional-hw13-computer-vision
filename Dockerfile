@@ -15,3 +15,6 @@ COPY model/ model/
 
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN cmake --build build
+RUN cmake --build build --target test
+
+CMD ["./build/fashion_mnist", "data/test.csv", "model"]
