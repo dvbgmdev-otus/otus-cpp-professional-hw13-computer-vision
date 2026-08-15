@@ -12,8 +12,10 @@ Eigen::MatrixXf read_mat_from_stream(size_t rows, size_t cols, std::istream& str
     Eigen::MatrixXf res(rows, cols);
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
-            float val;
-            stream >> val;
+            float val = 0.0f;
+            if (!(stream >> val)) {
+                throw std::runtime_error{ "Not enough values in model matrix" };
+            }
             res(i, j) = val;
         }
     }
@@ -22,7 +24,15 @@ Eigen::MatrixXf read_mat_from_stream(size_t rows, size_t cols, std::istream& str
 
 Eigen::MatrixXf read_mat_from_file(size_t rows, size_t cols, const std::string& filepath) {
     std::ifstream stream{ filepath };
-    return read_mat_from_stream(rows, cols, stream);
+    if (!stream.is_open()) {
+        throw std::runtime_error{ "Unable to open model file: " + filepath };
+    }
+    auto matrix = read_mat_from_stream(rows, cols, stream);
+    stream >> std::ws;
+    if (!stream.eof()) {
+        throw std::runtime_error{ "Unexpected data in model file: " + filepath };
+    }
+    return matrix;
 }
 
 bool read_features(std::istream& stream, Classifier::features_t& features) {

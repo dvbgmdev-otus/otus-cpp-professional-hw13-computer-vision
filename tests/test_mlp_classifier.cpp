@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <sstream>
+#include <stdexcept>
 
 #include "io.h"
 #include "mlp_classifier.h"
@@ -51,5 +53,17 @@ TEST(DataReader, Sample_WhenCsvRowProvided_ReturnsClassAndFeatures) {
     ASSERT_TRUE(mnist::read_sample(test_data, expected_class, features));
     EXPECT_EQ(7u, expected_class);
     EXPECT_EQ(kInputDim, features.size());
+}
+#endif
+
+#if (1)  // Part 3. Проверка чтения модели MLP
+// Test 3.1. Отсутствующий файл модели приводит к исключению
+TEST(ModelReader, Matrix_WhenFileMissing_ThrowsException) {
+    EXPECT_THROW(mnist::read_mat_from_file(1, 1, "model/missing.txt"), std::runtime_error);
+}
+// Test 3.2. Неполная матрица модели приводит к исключению
+TEST(ModelReader, Matrix_WhenValuesMissing_ThrowsException) {
+    std::istringstream model_data{ "1.0" };
+    EXPECT_THROW(mnist::read_mat_from_stream(1, 2, model_data), std::runtime_error);
 }
 #endif
